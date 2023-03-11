@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <assemblyIdentity type="win32" name="Blender.CRT" version="1.0.0.0" />
+    <file name="msvcp140.dll" hash="3e2681ea91f60a7a9ef2407399d13c1ca6aa71e9"  hashalg="SHA1" />
+    <file name="msvcp140_1.dll" hash="26f1bee679b7a6289b663c4fa4e65eba33a234e8"  hashalg="SHA1" />
+    <file name="msvcp140_2.dll" hash="f17330804c159418d4acf7a803662b8c1f7686fd"  hashalg="SHA1" />
+    <file name="msvcp140_atomic_wait.dll" hash="95f57da55ae2dad5807b87a0c2bae2784a788dec"  hashalg="SHA1" />
+    <file name="msvcp140_codecvt_ids.dll" hash="64e128c1f9cc440a3fd7564d00ae6f7e70cc2fa7"  hashalg="SHA1" />
+    <file name="vcruntime140_1.dll" hash="2e59d9bbcce356f0fece56c9c4917a5cacec63d7"  hashalg="SHA1" />
+    <file name="vcruntime140.dll" hash="2bc20acdcb201676b77a66fa7ec6b53fa2644713"  hashalg="SHA1" />
+    <file name="concrt140.dll" hash="dbca64bc390ea30d54c184086f0505fef35cd969"  hashalg="SHA1" />
+    <file name="vcomp140.dll" hash="967fd29b0a90d5f95728ca486caa3c0b1a93e59c"  hashalg="SHA1" />
+</assembly>
