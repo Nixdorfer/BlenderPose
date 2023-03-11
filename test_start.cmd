@@ -2,7 +2,7 @@
 chcp 65001
 setlocal EnableDelayedExpansion
 set position=%~dp0
-cd %position%Projects
+cd Projects
 cls
 set blender=%position%Blender\blender.exe
 :begin
@@ -32,7 +32,7 @@ if %choice% LSS 0 (
 if %choice% GTR !flag! (
 	call :error
 	goto begin)
-%blender% %position%projects\!projects[%choice%]!
+%blender% !projects[%choice%]!
 echo Program finished.
 timeout /t 5
 exit
