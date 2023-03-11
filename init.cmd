@@ -2,9 +2,9 @@
 chcp 65001
 setlocal EnableDelayedExpansion
 set position=%~dp0
-cd %position%Projects
 if "%1"=="" (goto no_args)
 del /s /q init.reg
+cd %position%Projects
 cls
 set blender=%position%Blender\blender.exe
 :begin
