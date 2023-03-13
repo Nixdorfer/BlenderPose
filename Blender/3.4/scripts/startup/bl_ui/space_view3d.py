@@ -3739,28 +3739,31 @@ class VIEW3D_MT_pose_apply(Menu):
 
 class RenderAndUploadToWebUI(bpy.types.Operator):
     bl_idname = "webui.render"
-    bl_label = "Minimal Operator"
+    bl_label = "Render And Update To WebUI"
+    bl_description = "渲染成品图, 这将包括材质和贴图\n注意: 这个功能不会设置摄像机, 在渲染前你必须先使用设置取景框功能来设定摄像机的位置\n渲染出图会放在Projects/Body, Canny和Depth三个文件夹里"
 
     def execute(self, context):
         frame = "000" + str(bpy.context.scene.frame_current)
         bpy.context.scene.render.filepath = '//Body/Image' + frame[-4:]
         bpy.ops.render.render(write_still=True, scene=bpy.context.scene.name)
-        for scene in bpy.data.scenes:
-            scene.frame_current += 1
+        #for scene in bpy.data.scenes: scene.frame_current += 1
         return {'FINISHED'}
-        
+bpy.utils.register_class(RenderAndUploadToWebUI)
 
 class PreviewCamera(bpy.types.Operator):
     bl_idname = "webui.preview_camera"
-    bl_label = "Minimal Operator"
+    bl_label = "Preview Camera"
+    bl_description = "设置摄像机的位置并预览最终渲染图包括的元素和构图\n注意: 并非是最终出图效果, 因为并未渲染材质和贴图\n如果需要持续调整取景框，请使用: 锁定取景框"
 
     def execute(self, context):
         if bpy.ops.view3d.camera_to_view.poll(): bpy.ops.view3d.camera_to_view()
         return {'FINISHED'}
+bpy.utils.register_class(PreviewCamera)
 
 class SetOrientation(bpy.types.Operator):
     bl_idname = "webui.set_orientation"
-    bl_label = "Minimal Operator"
+    bl_label = "Set Orientation"
+    bl_description = "设置坐标系\n全局坐标系: 无论选定关节朝向如何, 始终以地面为参考来移动\n局部坐标系: 按照关节朝向来移动\n视图坐标系: 以以当前镜头为法线的坐标系来移动"
 
     orientation: bpy.props.StringProperty(
         name="Orientation",
@@ -3772,10 +3775,12 @@ class SetOrientation(bpy.types.Operator):
             for slot in scene.transform_orientation_slots:
                 slot.type = self.orientation
         return {'FINISHED'}
+bpy.utils.register_class(SetOrientation)
 
 class SetMode(bpy.types.Operator):
     bl_idname = "webui.set_mode"
-    bl_label = "Minimal Operator"
+    bl_label = "Set A View Mode"
+    bl_description = "设置当前预览场景"
 
     mode: bpy.props.StringProperty(
         name="Mode",
@@ -3786,26 +3791,32 @@ class SetMode(bpy.types.Operator):
         if self.mode == 'POSE': bpy.ops.object.select_by_type(extend=False, type="ARMATURE") 
         bpy.ops.object.mode_set_with_submode(mode=self.mode)
         return {'FINISHED'}
+bpy.utils.register_class(SetMode)
 
 class MirrorXAxis(bpy.types.Operator):
     bl_idname = "webui.mirror_x_axis"
     bl_label = "Mirror X Axis"
+    bl_description = "在你编辑一侧身体的任何关节时同时编辑对侧的对应关节\n注意:\n如果两侧身体在被编辑的关节处已经存在差异,\n被选中的关节的对侧关节数据将被覆盖,\n但是其余的差异关节不受影响"
 
     def execute(self, context):
         bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x = not bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x
         return {'FINISHED'}
+bpy.utils.register_class(MirrorXAxis)
 
 class ToggleBones(bpy.types.Operator):
     bl_idname = "webui.toggle_bones"
     bl_label = "Toggle Bones"
+    bl_description = "隐藏所有辅助线"
 
     def execute(self, context):
         bpy.data.collections['OpenPoseBone_v2_grp_rig'].hide_viewport = not bpy.data.collections['OpenPoseBone_v2_grp_rig'].hide_viewport
         return {'FINISHED'}
+bpy.utils.register_class(ToggleBones)
 
 class ToggleLockCamera(bpy.types.Operator):
     bl_idname = "webui.toggle_lock_camera"
     bl_label = "Toggle Bones"
+    bl_description = "将取景框锁定在屏幕上, 无论你是否移动视角"
 
     def execute(self, context):
         for target in bpy.data.screens['Layout'].areas:
@@ -3813,19 +3824,23 @@ class ToggleLockCamera(bpy.types.Operator):
                 target.spaces.active.lock_camera = not target.spaces.active.lock_camera
         if bpy.ops.view3d.camera_to_view.poll(): bpy.ops.view3d.camera_to_view()
         return {'FINISHED'}
+bpy.utils.register_class(ToggleLockCamera)
 
 class ResetFrame(bpy.types.Operator):
     bl_idname = "webui.reset_frame"
     bl_label = "Reset Frame"
+    bl_description = "重置帧数为0, 这将覆盖缓存文件夹中未保存的同帧图片"
 
     def execute(self, context):
         for scene in bpy.data.scenes:
             scene.frame_current = 0
         return {'FINISHED'}
+bpy.utils.register_class(ResetFrame)
 
 class SetScene(bpy.types.Operator):
     bl_idname = "webui.set_scene"
     bl_label = "Set Scene"
+    bl_description = "切换场景和设置"
 
     name: bpy.props.StringProperty(
         name="Name",
@@ -3835,17 +3850,71 @@ class SetScene(bpy.types.Operator):
     def execute(self, context):
         bpy.context.window.scene = bpy.data.scenes.get(self.name)
         return {'FINISHED'}
-
-bpy.utils.register_class(ResetFrame)
 bpy.utils.register_class(SetScene)
-bpy.utils.register_class(MirrorXAxis)
-bpy.utils.register_class(ToggleBones)
-bpy.utils.register_class(ToggleLockCamera)
-bpy.utils.register_class(RenderAndUploadToWebUI)
-bpy.utils.register_class(SetOrientation)
-bpy.utils.register_class(SetMode)
-bpy.utils.register_class(PreviewCamera)
 
+class SetResolution(bpy.types.Operator):
+    bl_idname = "webui.get_resolution"
+    bl_label = "渲染分辨率"
+    bl_description = "设置最终渲染结果的分辨率"
+
+    resolution_x: bpy.props.IntProperty(name="宽度", default=4096)
+    resolution_y: bpy.props.IntProperty(name="高度", default=4096)
+
+    def execute(self, context):
+        bpy.context.scene.render.resolution_x = self.resolution_x
+        bpy.context.scene.render.resolution_y = self.resolution_y
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+bpy.utils.register_class(SetResolution)
+
+class NewFigur(bpy.types.Operator):
+    bl_idname = "webui.new_figur"
+    bl_label = "New Figur"
+    bl_description = "新建一个人物"
+
+    def execute(self, context):
+        bpy.data.collections['Figur'].copy()
+        return {'FINISHED'}
+bpy.utils.register_class(NewFigur)
+
+class DeleteSelectedFigur(bpy.types.Operator):
+    bl_idname = "webui.delete_selected_figur"
+    bl_label = "Delete Selected Figur"
+    bl_description = "删除当前选定的人物"
+
+    def execute(self, context):
+        return {'FINISHED'}
+bpy.utils.register_class(DeleteSelectedFigur)
+
+class ResetCursor(bpy.types.Operator):
+    bl_idname = "webui.reset_cursor"
+    bl_label = "Reset Cursor To Nose"
+    bl_description = "重置锚点至标准高度(鼻子高度)"
+
+    def execute(self, context):
+        for scene in bpy.data.scenes:
+            scene.cursor.location[0] = 0
+            scene.cursor.location[1] = 0
+            scene.cursor.location[2] = 1.5
+            scene.cursor.rotation_euler[0] = 0
+            scene.cursor.rotation_euler[1] = 0
+            scene.cursor.rotation_euler[2] = 0
+        return {'FINISHED'}
+bpy.utils.register_class(ResetCursor)
+
+'''
+class (bpy.types.Operator):
+    bl_idname = "webui."
+    bl_label = ""
+
+    def execute(self, context):
+        return {'FINISHED'}
+bpy.utils.register_class()
+'''
+
+#Pose Context Menu
 class VIEW3D_MT_pose_context_menu(bpy.types.Menu):
     bl_label = "姿态调节菜单"
 
@@ -3855,8 +3924,8 @@ class VIEW3D_MT_pose_context_menu(bpy.types.Menu):
 
         layout.operator("view3d.toggle_xray", text="切换透视模式")
         layout.operator("webui.toggle_bones", text="切换洁净模式")
-        layout.operator("webui.preview_camera", text="显示取景框")
-        layout.operator("webui.toggle_lock_camera", text="切换取景框常驻")
+        layout.operator("webui.preview_camera", text="显示并设置取景框")
+        layout.operator("webui.toggle_lock_camera", text="锁定取景框")
         layout.separator()
         if bpy.context.scene.name != 'Default': layout.operator("webui.set_scene", text="切换至完整输出").name='Default'
         if bpy.context.scene.name != 'Foot': layout.operator("webui.set_scene", text="切换至仅输出脚部").name='Foot'
@@ -3870,61 +3939,29 @@ class VIEW3D_MT_pose_context_menu(bpy.types.Menu):
         if bpy.context.scene.transform_orientation_slots[0].type != 'GLOBAL': layout.operator("webui.set_orientation", text="切换至全局坐标系").orientation='GLOBAL'
         if bpy.context.scene.transform_orientation_slots[0].type != 'LOCAL': layout.operator("webui.set_orientation", text="切换至局部坐标系").orientation='LOCAL'
         if bpy.context.scene.transform_orientation_slots[0].type != 'VIEW': layout.operator("webui.set_orientation", text="切换至视图坐标系").orientation='VIEW'
-        if bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x == True: layout.operator("webui.mirror_x_axis", text="关闭镜像编辑(当前已开启)")
-        if bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x == False: layout.operator("webui.mirror_x_axis", text="开启镜像编辑(当前已关闭)")
+        if bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x == True: layout.operator("webui.mirror_x_axis", text="关闭镜像编辑 [当前已开启]")
+        if bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x == False: layout.operator("webui.mirror_x_axis", text="开启镜像编辑 [当前已关闭]")
         layout.separator()
+        layout.operator("ed.undo", text="撤销")
+        layout.operator("ed.redo", text="重做")
+        layout.separator()
+        layout.operator("webui.reset_cursor", text="重置锚点位置")
+        layout.operator("pose.user_transforms_clear", text="重置选定部位动作").only_selected=True
+        layout.operator("pose.user_transforms_clear", text="重置全部人物动作").only_selected=False
+        layout.separator()
+        layout.operator("webui.get_resolution", text="设置取景框分辨率")
+        layout.operator("webui.render", text="渲染已经设置的取景框")
+        #TODO:
+        #layout.operator("pose.user_transforms_clear", text="添加一个人物")
+        #layout.operator("pose.user_transforms_clear", text="删除选定人物")
         #layout.operator("object.mode_set", text="切换到物体模式").mode='OBJECT'
-        layout.operator("webui.reset_frame", text="重置帧计数")
-        layout.operator("pose.user_transforms_clear", text="重置人物动作至初始状态").only_selected=False
-        layout.separator()
-        layout.operator("webui.render", text="渲染并装填到webui")
+        #layout.operator("webui.reset_frame", text="重置帧计数")
 
-
-'''class VIEW3D_MT_pose_context_menu(Menu):
-    bl_label = "Pose Context Menu"
-
-    def draw(self, _context):
-        layout = self.layout
-
-        layout.operator_context = 'INVOKE_REGION_WIN'
-
-        layout.operator("anim.keyframe_insert_menu", text="Insert Keyframe...")
-
-        layout.separator()
-
-        layout.operator("pose.copy", icon='COPYDOWN')
-        layout.operator("pose.paste", icon='PASTEDOWN').flipped = False
-        layout.operator("pose.paste", iclcon='PASTEFLIPDOWN', text="Paste X-Flipped Pose").flipped = True
-
-        layout.separator()
-
-        props = layout.operator("wm.call_panel", text="Rename Active Bone...")
-        props.name = "TOPBAR_PT_name"
-        props.keep_open = False
-
-        layout.separator()
-
-        layout.operator("pose.push")
-        layout.operator("pose.relax")
-        layout.operator("pose.breakdown")
-        layout.operator("pose.blend_to_neighbor")
-
-        layout.separator()
-
-        layout.operator("pose.paths_calculate", text="Calculate Motion Paths")
-        layout.operator("pose.paths_clear", text="Clear Motion Paths")
-        layout.operator("pose.paths_update", text="Update Armature Motion Paths")
-        layout.operator("object.paths_update_visible", text="Update All Motion Paths")
-
-        layout.separator()
-
-        layout.operator("pose.hide").unselected = False
-        layout.operator("pose.reveal")
-
-        layout.separator()
-
-        layout.operator("pose.user_transforms_clear")'''
-
+'''
+layout.operator("", text="")
+bpy.data.collections.remove(bpy.data.collections['Figur'])
+bpy.data.collections['Figur'].copy()
+'''
 
 class BoneOptions:
     def draw(self, context):

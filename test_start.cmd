@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 set position=%~dp0
 cd Projects
 cls
-set blender=%position%Blender\blender.exe
+set blender=%position%Blender\blender-launcher.exe
 :begin
 set flag=0
 set projects[0]=""
