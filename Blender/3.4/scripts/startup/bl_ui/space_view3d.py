@@ -2514,7 +2514,7 @@ class VIEW3D_MT_object_clear(Menu):
 
         layout.operator("object.origin_clear", text="Origin")
 
-
+'''
 class VIEW3D_MT_object_context_menu(Menu):
     bl_label = "Object Context Menu"
 
@@ -2527,20 +2527,6 @@ class VIEW3D_MT_object_context_menu(Menu):
 
         selected_objects_len = len(context.selected_objects)
 
-        # If nothing is selected
-        # (disabled for now until it can be made more useful).
-        '''
-        if selected_objects_len == 0:
-
-            layout.menu("VIEW3D_MT_add", text="Add", text_ctxt=i18n_contexts.operator_default)
-            layout.operator("view3d.pastebuffer", text="Paste Objects", icon='PASTEDOWN')
-
-            return
-        '''
-
-        # If something is selected
-
-        # Individual object types.
         if obj is None:
             pass
 
@@ -2698,7 +2684,6 @@ class VIEW3D_MT_object_context_menu(Menu):
                 layout.separator()
 
         # Shared among all object types
-        layout.operator("webui.set_mode", text="切换到姿态模式").mode='POSE'
         layout.separator()
         layout.operator("view3d.copybuffer", text="Copy Objects", icon='COPYDOWN')
         layout.operator("view3d.pastebuffer", text="Paste Objects", icon='PASTEDOWN')
@@ -2734,7 +2719,7 @@ class VIEW3D_MT_object_context_menu(Menu):
 
         layout.operator_context = 'EXEC_REGION_WIN'
         layout.operator("object.delete", text="Delete").use_global = False
-
+'''
 
 class VIEW3D_MT_object_shading(Menu):
     # XXX, this menu is a place to store shading operator in object mode
@@ -3914,6 +3899,41 @@ class (bpy.types.Operator):
 bpy.utils.register_class()
 '''
 
+#Object Context Menu
+class VIEW3D_MT_object_context_menu(Menu):
+    bl_label = "Object Context Menu"
+
+    def draw(self, context):
+        layout = self.layout
+        view = context.space_data
+        obj = context.object
+        selected_objects_len = len(context.selected_objects)
+
+        layout.operator("webui.set_mode", text="切换到姿态模式").mode='POSE'
+        layout.separator()
+        layout.operator("view3d.toggle_xray", text="切换透视模式")
+        layout.operator("webui.toggle_bones", text="切换洁净模式")
+        layout.operator("webui.preview_camera", text="显示并设置取景框")
+        layout.operator("webui.toggle_lock_camera", text="锁定取景框")
+        layout.separator()
+        if bpy.context.scene.name != 'Default': layout.operator("webui.set_scene", text="切换至完整输出").name='Default'
+        if bpy.context.scene.name != 'Foot': layout.operator("webui.set_scene", text="切换至仅输出脚部").name='Foot'
+        if bpy.context.scene.name != 'Hand': layout.operator("webui.set_scene", text="切换至仅输出手部").name='Hand'
+        if bpy.context.scene.name != 'None': layout.operator("webui.set_scene", text="切换至仅输出骨骼").name='None'
+        layout.separator()
+        if bpy.context.scene.transform_orientation_slots[0].type != 'GLOBAL': layout.operator("webui.set_orientation", text="切换至全局坐标系").orientation='GLOBAL'
+        if bpy.context.scene.transform_orientation_slots[0].type != 'LOCAL': layout.operator("webui.set_orientation", text="切换至局部坐标系").orientation='LOCAL'
+        if bpy.context.scene.transform_orientation_slots[0].type != 'VIEW': layout.operator("webui.set_orientation", text="切换至视图坐标系").orientation='VIEW'
+        layout.separator()
+        layout.operator("object.select_all", text="全选")
+        layout.operator("ed.undo", text="撤销")
+        layout.operator("ed.redo", text="重做")
+        layout.separator()
+        layout.operator("webui.reset_cursor", text="重置锚点位置")
+        layout.separator()
+        layout.operator("webui.get_resolution", text="设置取景框分辨率")
+        layout.operator("webui.render", text="渲染已经设置的取景框")
+
 #Pose Context Menu
 class VIEW3D_MT_pose_context_menu(bpy.types.Menu):
     bl_label = "姿态调节菜单"
@@ -3922,6 +3942,14 @@ class VIEW3D_MT_pose_context_menu(bpy.types.Menu):
         layout = self.layout
         layout.operator_context = 'INVOKE_REGION_WIN'
 
+        if bpy.context.scene.transform_orientation_slots[0].type != 'GLOBAL': layout.operator("webui.set_orientation", text="切换至全局坐标系").orientation='GLOBAL'
+        if bpy.context.scene.transform_orientation_slots[0].type != 'LOCAL': layout.operator("webui.set_orientation", text="切换至局部坐标系").orientation='LOCAL'
+        if bpy.context.scene.transform_orientation_slots[0].type != 'VIEW': layout.operator("webui.set_orientation", text="切换至视图坐标系").orientation='VIEW'
+        if bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x == True: layout.operator("webui.mirror_x_axis", text="关闭镜像编辑 [当前已开启]")
+        if bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x == False: layout.operator("webui.mirror_x_axis", text="开启镜像编辑 [当前已关闭]")
+        layout.separator()
+        layout.operator("object.mode_set", text="切换到物体模式").mode="OBJECT"
+        layout.separator()
         layout.operator("view3d.toggle_xray", text="切换透视模式")
         layout.operator("webui.toggle_bones", text="切换洁净模式")
         layout.operator("webui.preview_camera", text="显示并设置取景框")
@@ -3935,12 +3963,6 @@ class VIEW3D_MT_pose_context_menu(bpy.types.Menu):
         layout.operator("wm.tool_set_by_id", text="使用移动工具").name='builtin.move'
         layout.operator("wm.tool_set_by_id", text="使用旋转工具").name='builtin.rotate'
         layout.operator("wm.tool_set_by_id", text="使用多功能工具").name='builtin.transform'
-        layout.separator()
-        if bpy.context.scene.transform_orientation_slots[0].type != 'GLOBAL': layout.operator("webui.set_orientation", text="切换至全局坐标系").orientation='GLOBAL'
-        if bpy.context.scene.transform_orientation_slots[0].type != 'LOCAL': layout.operator("webui.set_orientation", text="切换至局部坐标系").orientation='LOCAL'
-        if bpy.context.scene.transform_orientation_slots[0].type != 'VIEW': layout.operator("webui.set_orientation", text="切换至视图坐标系").orientation='VIEW'
-        if bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x == True: layout.operator("webui.mirror_x_axis", text="关闭镜像编辑 [当前已开启]")
-        if bpy.data.objects['OpenPoseBone_v2_rig'].pose.use_mirror_x == False: layout.operator("webui.mirror_x_axis", text="开启镜像编辑 [当前已关闭]")
         layout.separator()
         layout.operator("ed.undo", text="撤销")
         layout.operator("ed.redo", text="重做")
